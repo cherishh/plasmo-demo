@@ -1,0 +1,8 @@
+.test {
+  position: absolute;
+  right: 0;
+  top: 100px;
+  width: 100rem;
+  height: 100rem;
+  border: 1px solid #000;
+}
