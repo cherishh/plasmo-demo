@@ -9,6 +9,10 @@ const container = document.createElement('div')
 container.id = "myRoot"
 document.body.appendChild(container);
 export const getRootContainer = () => document.getElementById("myRoot")
+const myRoot = getRootContainer();
+const fucker = document.getElementById('plasmo-overlay-0');
+fucker.style.left = null;
+fucker.style.right = '0px';
 
 const Test = () => {
   const [info, setInfo] = useState("")

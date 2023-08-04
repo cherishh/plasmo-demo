@@ -3,10 +3,10 @@
   z-index: 2147483647;
 }
 
-#plasmo-shadow-container > .plasmo-csui-container {
+.plasmo-csui-container {
   position: absolute;
   top: 0;
-  right: 152px !important;
+  right: 0;
 }
 
 .test {
