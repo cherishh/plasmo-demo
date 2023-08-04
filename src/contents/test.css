@@ -1,8 +1,22 @@
-.test {
+#plasmo-shadow-container {
+  position: relative;
+  z-index: 2147483647;
+}
+
+#plasmo-shadow-container > .plasmo-csui-container {
   position: absolute;
-  right: 0;
-  top: 100px;
-  width: 100rem;
-  height: 100rem;
+  top: 0;
+  right: 152px !important;
+}
+
+.test {
+  position: fixed;
+  width: 150px;
+  height: 200px;
   border: 1px solid #000;
+  background-color: #e5e5e5;
+}
+
+.test > .info {
+  font-size: 16px;
 }
