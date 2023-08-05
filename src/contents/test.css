@@ -5,18 +5,23 @@
 
 .plasmo-csui-container {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 3.5rem !important;
+  left: auto !important;
+  right: 20rem !important;
 }
 
-.test {
+.container {
+
+}
+
+.main {
   position: fixed;
-  width: 150px;
-  height: 200px;
+  width: 20rem;
+  height: 24rem;
   border: 1px solid #000;
   background-color: #e5e5e5;
 }
 
-.test > .info {
+.main > .info {
   font-size: 16px;
 }

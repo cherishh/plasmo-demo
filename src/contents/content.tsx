@@ -2,46 +2,36 @@ import { Readability } from "@mozilla/readability"
 import styleText from "data-text:./test.css"
 import type { PlasmoCSConfig, PlasmoGetStyle, PlasmoRender } from "plasmo"
 import { useState, useEffect } from "react"
-import  ReactDOM from "react-dom"
 import { sendToBackground } from "@plasmohq/messaging"
+import { useMessage } from "@plasmohq/messaging/hook"
+import store from '../store';
+import Main from '../csui/index'
 
-const container = document.createElement('div')
-container.id = "myRoot"
-document.body.appendChild(container);
-export const getRootContainer = () => document.getElementById("myRoot")
-const myRoot = getRootContainer();
-const fucker = document.getElementById('plasmo-overlay-0');
-fucker.style.left = null;
-fucker.style.right = '0px';
+export const config: PlasmoCSConfig = {
+  all_frames: true
+}
 
-const Test = () => {
-  const [info, setInfo] = useState("")
+export const getStyle: PlasmoGetStyle = () => {
+  const style = document.createElement("style")
+  style.textContent = styleText
+  return style
+}
+
+const Container = (props) => {
+  const [show, setShow] = useState(false)
+  const { data } = useMessage<string, string>(async (req, res) => {
+    setShow(true)
+  })
 
   useEffect(() => {
-    window.addEventListener("load", () => {
-      console.log("test")
-      const newDocument = document.implementation.createHTMLDocument()
-      newDocument.documentElement.innerHTML = document.documentElement.innerHTML
-      const article = new Readability(newDocument).parse()
-      console.log(article, "article")
-      sendToBackground({
-        name: "summarize",
-        body: { content: article.textContent }
-      }).then((res) => {
-        console.log(res, "res")
-        setInfo(res.message.info.description)
-      })
-    })
+
   }, [])
 
   return (
-    <div className="test">
-      <div className="info">
-        {info}
-      </div>
-      <button>Custom button1</button>
+    <div className="container">
+      {show ? <Main setShow={setShow} /> : null}
     </div>
   )
 }
 
-export default Test
+export default Container

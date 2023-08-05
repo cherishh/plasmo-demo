@@ -1,0 +1,18 @@
+import { useState } from "react"
+
+import { sendToBackground, sendToContentScript } from "@plasmohq/messaging"
+
+sendToContentScript({
+  name: "clicked popup",
+  body: {clickedPop: true }
+})
+
+function IndexPopup() {
+
+  return (
+    <div>
+    </div>
+  )
+}
+
+export default IndexPopup

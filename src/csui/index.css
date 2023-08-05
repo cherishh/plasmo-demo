@@ -1,0 +1,11 @@
+.main {
+  position: fixed;
+  width: 20rem;
+  height: 24rem;
+  border: 1px solid #000;
+  background-color: #e5e5e5;
+}
+
+.main > .info {
+  font-size: 16px;
+}
