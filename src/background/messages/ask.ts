@@ -1,17 +1,26 @@
+import type { ParsedEvent, ReconnectInterval } from "eventsource-parser"
+import { createParser } from "eventsource-parser"
 import type { PlasmoMessaging } from "@plasmohq/messaging"
- 
+
 const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
-  const message = await fetch(`https://fakestoreapi.com/products/${req.body.idx}`)
-  .then(response => response.json())
-  .then(json => {
-    return {
-      info: json,
-      req: req
-    }
-  })
-  res.send({
-    message
-  })
+  const messageRes = await fetch(`http://localhost:3000/chat`, {
+    method: "POST",
+    headers: {
+      "Content-Type": 'application/json',
+      Connection: "keep-alive"
+    },
+    body: JSON.stringify(req.body)
+  });
+  
+  const reader = messageRes.body.pipeThrough(new TextDecoderStream()).getReader();
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    res.send(value);
+    console.log(value, 'received');
+  }
+
+
 }
- 
+
 export default handler

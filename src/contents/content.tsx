@@ -1,11 +1,13 @@
 import { Readability } from "@mozilla/readability"
 import styleText from "data-text:./test.css"
 import type { PlasmoCSConfig, PlasmoGetStyle, PlasmoRender } from "plasmo"
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
+
 import { sendToBackground } from "@plasmohq/messaging"
 import { useMessage } from "@plasmohq/messaging/hook"
-import store from '../store';
-import Main from '../csui/index'
+
+import Main from "../csui/index"
+import store from "../store"
 
 export const config: PlasmoCSConfig = {
   all_frames: true
@@ -23,14 +25,10 @@ const Container = (props) => {
     setShow(true)
   })
 
-  useEffect(() => {
-
-  }, [])
+  useEffect(() => {}, [])
 
   return (
-    <div className="container">
-      {show ? <Main setShow={setShow} /> : null}
-    </div>
+    <div className="container">{show ? <Main setShow={setShow} /> : null}</div>
   )
 }
 
