@@ -1,17 +1,19 @@
 import { Readability } from "@mozilla/readability"
 import { useEffect, useState } from "react"
-import { useStorage } from "@plasmohq/storage/hook"
+
 import { sendToBackground } from "@plasmohq/messaging"
+import { useStorage } from "@plasmohq/storage/hook"
 
 const Main = (props) => {
   const { setShow } = props
   const [info, setInfo] = useState("")
   const [val, setVal] = useState("")
-  const [answer, setAnswer] = useState("")
   const [content, setContent] = useStorage("content", undefined)
+  const [txt, setTxt] = useState("")
+
 
   useEffect(() => {
-    console.log(content, "content get");
+    console.log(content, "content get")
     if (content === undefined) {
       setContent({
         content: [
@@ -23,12 +25,12 @@ const Main = (props) => {
             role: "assistant",
             content:
               "你好kk！很高兴认识你。你今年24岁，那你是个年轻人呢！有什么我可以帮助你的吗？"
-          },
+          }
         ],
         temperature: 0.3
       })
     } else {
-      console.log(content, "content stored");
+      console.log(content, "content stored")
     }
   }, [])
 
@@ -46,28 +48,57 @@ const Main = (props) => {
     })
   }, [])
 
-  const query = () => {
+  const query = async () => {
+    let text = ''
     setVal("")
-    setAnswer('set answer')
-    console.log(content, "content");
+    console.log(content, "content")
 
-    const newContent = content.content;
+    const newContent = content.content
     newContent.push({
       role: "user",
-      content: '我今年多大了？'
+      content: "我今年多大了？"
       // content: val
-    });
+    })
     setContent({
       content: newContent,
       temperature: 0.3
-    });
-
-    sendToBackground({
-      name: "ask",
-      body: { content: newContent, temperature: content.temperature }
-    }).then((res) => {
-      console.log(res, "res")
     })
+
+    const messageRes = await fetch(`http://localhost:3000/chat`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Connection: "keep-alive",
+        Authorization: `Bearer E-08Q~DfuzIqdTW4-spyUn3Rtum9fynNe18O0bID`
+      },
+      body: JSON.stringify({
+        content: newContent,
+        temperature: 0.3
+      })
+    })
+
+    const reader = messageRes.body
+      .pipeThrough(new TextDecoderStream())
+      .getReader()
+    while (true) {
+      const { value, done } = await reader.read()
+      if (done) break
+      const dataStrList = value.split('\n\n')
+      dataStrList.forEach(dataStr => {
+        const dataJson = dataStr.replace(/^data:/, '').trim()
+        try {
+          const data = JSON.parse(dataJson)
+          const content = data?.choices[0]?.delta?.content
+          if (!content) return
+  
+          text += content
+  
+        } catch (e) {}
+      })
+      setTxt(text)
+      console.log(text, "text")
+
+    }
   }
 
   const onEnter = (e) => {
@@ -88,7 +119,7 @@ const Main = (props) => {
         onChange={(e) => setVal(e.target.value)}
       />
       <button onClick={query}>send</button>
-      <div>{answer}</div>
+      <div>{txt}</div>
     </div>
   )
 }
