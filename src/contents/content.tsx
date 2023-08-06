@@ -1,5 +1,5 @@
 import { Readability } from "@mozilla/readability"
-import styleText from "data-text:./test.css"
+import cssText from "data-text:~style.css"
 import type { PlasmoCSConfig, PlasmoGetStyle, PlasmoRender } from "plasmo"
 import { useEffect, useState } from "react"
 
@@ -15,7 +15,7 @@ export const config: PlasmoCSConfig = {
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
-  style.textContent = styleText
+  style.textContent = cssText
   return style
 }
 

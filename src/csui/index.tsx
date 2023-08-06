@@ -1,8 +1,14 @@
 import { Readability } from "@mozilla/readability"
 import { useEffect, useState } from "react"
-
 import { sendToBackground } from "@plasmohq/messaging"
 import { useStorage } from "@plasmohq/storage/hook"
+// import cssText from "data-text:~style.css"
+
+// export const getStyle = () => {
+//   const style = document.createElement("style")
+//   style.textContent = cssText
+//   return style
+// }
 
 const Main = (props) => {
   const { setShow } = props
@@ -119,7 +125,7 @@ const Main = (props) => {
         onChange={(e) => setVal(e.target.value)}
       />
       <button onClick={query}>send</button>
-      <div>{txt}</div>
+      <div className="px-5 py-2.5">{txt}</div>
     </div>
   )
 }
