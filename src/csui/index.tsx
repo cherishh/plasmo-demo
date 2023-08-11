@@ -1,74 +1,51 @@
-import { Readability } from "@mozilla/readability"
-import { useEffect, useState } from "react"
-import { sendToBackground } from "@plasmohq/messaging"
-import { useStorage } from "@plasmohq/storage/hook"
-// import cssText from "data-text:~style.css"
+import { Readability } from "@mozilla/readability";
+import { useEffect, useState } from "react";
+import { sendToBackground } from "@plasmohq/messaging";
+import { useStorage } from "@plasmohq/storage/hook";
+import { Storage } from "@plasmohq/storage";
 
-// export const getStyle = () => {
-//   const style = document.createElement("style")
-//   style.textContent = cssText
-//   return style
-// }
+const st = new Storage();
 
 const Main = (props) => {
   const { setShow } = props
-  const [info, setInfo] = useState("")
   const [val, setVal] = useState("")
-  const [content, setContent] = useStorage("content", undefined)
+  // const [storage, setStorage] = useStorage("content", undefined)
   const [txt, setTxt] = useState("")
 
-
   useEffect(() => {
-    console.log(content, "content get")
-    if (content === undefined) {
-      setContent({
-        content: [
+    const init = async () => {
+      const newDocument = document.implementation.createHTMLDocument()
+      newDocument.documentElement.innerHTML = document.documentElement.innerHTML
+      const article = new Readability(newDocument).parse()
+      console.log(article, "article")
+      const initContent = [
           {
-            role: "user",
-            content: "我是kk，今年24岁。"
+            role: "system",
+            content: `你是一个阅读专家。你将会获得一份由"""分隔的文本，请仅根据该文本内容，以合适的方式回答用户关于文本的提问。如果文章中没有出现某个信息，请如实回答："文章没有提到该内容。文章内容:\n"""${article.textContent}""""\n【IMPORTANT】再次提醒，你应该只根据文章内容对用户的问题做出回答，如果文章中没有相关信息，请如实回答不知道。`
           },
           {
-            role: "assistant",
-            content:
-              "你好kk！很高兴认识你。你今年24岁，那你是个年轻人呢！有什么我可以帮助你的吗？"
+            role: "user",
+            content: `请总结文章的主要内容，直接输入总结的内容即可。`
           }
-        ],
-        temperature: 0.3
-      })
-    } else {
-      console.log(content, "content stored")
+        ];
+      // setStorage(initContent)
+      await st.set("ct", initContent)
+      query(initContent, true)
     }
+    init();
   }, [])
 
-  useEffect(() => {
-    const newDocument = document.implementation.createHTMLDocument()
-    newDocument.documentElement.innerHTML = document.documentElement.innerHTML
-    const article = new Readability(newDocument).parse()
-    console.log(article, "article")
-    sendToBackground({
-      name: "summarize",
-      body: { content: article.textContent }
-    }).then((res) => {
-      // console.log(res, "res")
-      setInfo(res.message.info.description)
-    })
-  }, [])
-
-  const query = async () => {
-    let text = ''
+  const query = async (msg, isInit = false) => {
+    let text = ""
     setVal("")
-    console.log(content, "content")
-
-    const newContent = content.content
-    newContent.push({
-      role: "user",
-      content: "我今年多大了？"
-      // content: val
-    })
-    setContent({
-      content: newContent,
-      temperature: 0.3
-    })
+    await updateStorage(msg, "user");
+    let newContent;
+    if (isInit) {
+      newContent = msg;
+    } else {
+      newContent = await st.get('ct');
+      console.log(newContent, 'get ct');
+    }
 
     const messageRes = await fetch(`http://localhost:3000/chat`, {
       method: "POST",
@@ -83,32 +60,55 @@ const Main = (props) => {
       })
     })
 
+    console.log(
+      {
+        content: newContent,
+        temperature: 0.3
+      },
+      "params"
+    )
+
     const reader = messageRes.body
       .pipeThrough(new TextDecoderStream())
       .getReader()
     while (true) {
       const { value, done } = await reader.read()
       if (done) break
-      const dataStrList = value.split('\n\n')
-      dataStrList.forEach(dataStr => {
-        const dataJson = dataStr.replace(/^data:/, '').trim()
+      const dataStrList = value.split("\n\n")
+      dataStrList.forEach((dataStr) => {
+        const dataJson = dataStr.replace(/^data:/, "").trim()
         try {
           const data = JSON.parse(dataJson)
           const content = data?.choices[0]?.delta?.content
           if (!content) return
-  
+
           text += content
-  
         } catch (e) {}
       })
       setTxt(text)
-      console.log(text, "text")
 
+      // console.log(text, "text")
     }
+    updateStorage(text, "assistant")
+  }
+
+  const updateStorage = async (content, role) => {
+    // const cp = storage || [];
+    const cp: any[] = await st.get('ct') || [];
+    console.log(cp, 'get ct');
+    cp.push({
+      role,
+      content
+    })
+    // setStorage(cp)
+    st.set("ct", cp);
+
+    console.log(cp, 'updated');
+    return cp
   }
 
   const onEnter = (e) => {
-    if (e.keyCode === 13) query()
+    if (e.keyCode === 13) query(val)
   }
 
   return (
@@ -117,7 +117,6 @@ const Main = (props) => {
         {" "}
         X{" "}
       </div>
-      <div className="info">{info}</div>
       <input
         onKeyUp={onEnter}
         type="text"

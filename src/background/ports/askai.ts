@@ -1,8 +1,6 @@
-import type { ParsedEvent, ReconnectInterval } from "eventsource-parser"
-import { createParser } from "eventsource-parser"
 import type { PlasmoMessaging } from "@plasmohq/messaging"
-
-const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
+ 
+const handler: PlasmoMessaging.PortHandler = async (req, res) => {
   const messageRes = await fetch(`http://localhost:3000/chat`, {
     method: "POST",
     headers: {
@@ -23,5 +21,5 @@ const handler: PlasmoMessaging.MessageHandler = async (req, res) => {
     console.log(value, 'received');
   }
 }
-
+ 
 export default handler
